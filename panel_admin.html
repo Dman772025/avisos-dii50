@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin — Delegación Sindical D-II-50</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:#C0181A; --red-dark:#8B0E10; --orange:#E8650A; --amber:#F5A623;
+  --blue:#1E6BB5; --blue-dark:#0D4A8C;
+  --bg:#F5F5F5; --card:#FFFFFF; --border:#E0E0E0;
+  --text:#1A1A1A; --text2:#666; --text3:#999;
+  --green:#2E7D32; --green-light:#E8F5E9;
+  --yellow-light:#FFF8E1; --red-light:#FFEBEE;
+  --purple:#6A1B9A; --purple-light:#F3E5F5;
+  --teal:#00695C; --teal-light:#E0F2F1;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── HEADER ── */
+.top-bar{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.top-bar h1{font-family:'Oswald',sans-serif;font-size:18px;color:#fff;font-weight:500;letter-spacing:1px;}
+.top-bar .subtitle{font-size:12px;color:rgba(255,255,255,0.7);letter-spacing:0.5px;}
+.top-bar-left{display:flex;flex-direction:column;}
+.script-url-bar{background:var(--red-dark);padding:6px 24px;display:flex;align-items:center;gap:10px;font-size:12px;color:rgba(255,255,255,0.8);}
+.script-url-bar input{flex:1;max-width:500px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:4px 10px;color:#fff;font-size:12px;font-family:'Source Sans 3',sans-serif;}
+.script-url-bar input::placeholder{color:rgba(255,255,255,0.5);}
+.btn-sm{padding:4px 12px;border-radius:4px;border:none;font-size:12px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:600;}
+.btn-save-url{background:var(--amber);color:#1a0a05;}
+.status-badge{display:flex;align-items:center;gap:5px;font-size:12px;}
+.dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;}
+.dot.online{background:#4CAF50;box-shadow:0 0 6px rgba(76,175,80,0.5);}
+.dot.offline{background:#ccc;}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 88px);}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:16px 0;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:14px;color:var(--text2);transition:all .15s;border-left:3px solid transparent;}
+.nav-item:hover{background:#f9f9f9;color:var(--text);}
+.nav-item.active{background:var(--red-light);color:var(--red);border-left-color:var(--red);font-weight:600;}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.nav-section{font-size:10px;letter-spacing:2px;color:var(--text3);padding:16px 20px 4px;text-transform:uppercase;}
+.content{padding:24px;overflow-y:auto;}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08);margin-bottom:20px;overflow:hidden;}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;color:var(--text);}
+.card-body{padding:20px;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;margin-bottom:20px;}
+.tab{padding:8px 18px;border-radius:6px;border:none;background:none;font-size:14px;color:var(--text2);cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .15s;}
+.tab.active{background:var(--red);color:#fff;font-weight:600;}
+.tab:hover:not(.active){background:var(--border);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── FORMS ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+.form-row.triple{grid-template-columns:1fr 1fr 1fr;}
+.form-row.single{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+label{font-size:13px;font-weight:600;color:var(--text2);}
+input,select,textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;font-family:'Source Sans 3',sans-serif;color:var(--text);transition:border .15s;background:#fff;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(192,24,26,0.1);}
+textarea{resize:vertical;min-height:80px;}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:14px;}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--red);}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 20px;border-radius:6px;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:'Source Sans 3',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--red);color:#fff;}
+.btn-primary:hover{background:var(--red-dark);}
+.btn-secondary{background:var(--border);color:var(--text);}
+.btn-secondary:hover{background:#d0d0d0;}
+.btn-success{background:var(--green);color:#fff;}
+.btn-danger{background:#D32F2F;color:#fff;}
+.btn-orange{background:var(--orange);color:#fff;}
+.btn-row{display:flex;gap:10px;margin-top:16px;}
+
+/* ── TABLA DE AVISOS ── */
+.avisos-table{width:100%;border-collapse:collapse;}
+.avisos-table th{background:var(--bg);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);}
+.avisos-table td{padding:12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle;}
+.avisos-table tr:hover td{background:#fafafa;}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;}
+.badge-active{background:var(--green-light);color:var(--green);}
+.badge-inactive{background:var(--border);color:var(--text2);}
+.badge-vencido{background:var(--red-light);color:var(--red);}
+.badge-pendiente{background:var(--yellow-light);color:#F57F17;}
+.badge-cat{background:rgba(192,24,26,0.08);color:var(--red);font-size:11px;}
+
+/* ── TOGGLE ── */
+.toggle{position:relative;width:36px;height:20px;display:inline-block;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:10px;cursor:pointer;transition:.2s;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s;}
+.toggle input:checked+.toggle-slider{background:var(--green);}
+.toggle input:checked+.toggle-slider::before{transform:translateX(16px);}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--card);border-radius:10px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.08);border-left:4px solid var(--red);}
+.stat-card.blue{border-left-color:var(--blue);}
+.stat-card.green{border-left-color:var(--green);}
+.stat-card.orange{border-left-color:var(--orange);}
+.stat-num{font-family:'Oswald',sans-serif;font-size:32px;font-weight:600;color:var(--text);line-height:1;}
+.stat-label{font-size:12px;color:var(--text2);margin-top:4px;}
+
+/* ── CALENDARIO EVENTOS ── */
+.event-list{display:flex;flex-direction:column;gap:8px;}
+.event-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:8px;background:#fafafa;border:1px solid var(--border);}
+.event-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.event-date{font-size:12px;color:var(--text3);white-space:nowrap;min-width:80px;}
+.event-text{font-size:14px;color:var(--text);}
+.event-tipo{font-size:11px;font-weight:600;}
+
+/* ── PRESTACIONES ── */
+.prest-card{background:linear-gradient(135deg,var(--orange),var(--amber));border-radius:10px;padding:20px;color:white;margin-bottom:16px;}
+.prest-mes{font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;}
+.prest-quincena{font-size:13px;opacity:0.85;margin-bottom:12px;}
+.prest-items{display:flex;flex-direction:column;gap:6px;}
+.prest-item{background:rgba(255,255,255,0.2);border-radius:6px;padding:8px 12px;font-size:13px;}
+
+/* ── FONDO TEMPORADA PREVIEW ── */
+.season-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.season-preview{border-radius:8px;overflow:hidden;cursor:pointer;border:3px solid transparent;transition:all .2s;}
+.season-preview.selected{border-color:var(--red);}
+.season-preview .preview-bg{height:80px;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.season-preview .preview-label{background:#fff;padding:6px;text-align:center;font-size:12px;font-weight:600;color:var(--text);}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:#323232;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:1000;max-width:320px;}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast.success{background:var(--green);}
+#toast.error{background:#D32F2F;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:12px;padding:24px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-family:'Oswald',sans-serif;font-size:18px;font-weight:500;}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);padding:4px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .form-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <h1>⚙️ Panel de Administración</h1>
+    <span class="subtitle">Delegación Sindical D-II-50 — Sistema de Avisos</span>
+  </div>
+  <div class="status-badge">
+    <span class="dot" id="conn-dot"></span>
+    <span id="conn-label" style="color:rgba(255,255,255,0.8);font-size:13px;">Sin conectar</span>
+  </div>
+</div>
+<div class="script-url-bar">
+  <span>URL Apps Script:</span>
+  <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/.../exec" />
+  <button class="btn-sm btn-save-url" onclick="saveScriptUrl()">Conectar</button>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="showSection('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showSection('avisos')"><span class="nav-icon">📢</span> Avisos</div>
+    <div class="nav-item" onclick="showSection('ticker')"><span class="nav-icon">📌</span> Ticker</div>
+    <div class="nav-section">Calendario</div>
+    <div class="nav-item" onclick="showSection('eventos')"><span class="nav-icon">📅</span> Eventos del día</div>
+    <div class="nav-item" onclick="showSection('prestaciones')"><span class="nav-icon">💰</span> Prestaciones</div>
+    <div class="nav-section">Ajustes</div>
+    <div class="nav-item" onclick="showSection('cumpleanos')"><span class="nav-icon">🎂</span> Cumpleaños</div>
+    <div class="nav-item" onclick="showSection('temporadas')"><span class="nav-icon">🎨</span> Fondos</div>
+    <div class="nav-item" onclick="showSection('config')"><span class="nav-icon">⚙️</span> Configuración</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="main-content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="section-dashboard" class="tab-panel active">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="stat-avisos">—</div><div class="stat-label">Avisos activos</div></div>
+        <div class="stat-card blue"><div class="stat-num" id="stat-ticker">—</div><div class="stat-label">Tickers activos</div></div>
+        <div class="stat-card green"><div class="stat-num" id="stat-bdays">—</div><div class="stat-label">Cumpleaños hoy</div></div>
+        <div class="stat-card orange"><div class="stat-num" id="stat-eventos">—</div><div class="stat-label">Eventos hoy</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="card">
+          <div class="card-header"><span class="card-title">📅 Hoy en el calendario</span></div>
+          <div class="card-body" id="hoy-eventos"><p style="color:var(--text3);font-size:14px;">Conecta el sistema para ver eventos.</p></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">💰 Próximas prestaciones</span></div>
+          <div class="card-body" id="hoy-prestaciones"><p style="color:var(--text3);font-size:14px;">Cargando prestaciones...</p></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header"><span class="card-title">⚡ Acciones rápidas</span></div>
+        <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="showSection('avisos');setTimeout(()=>openModal('modal-aviso'),100)">➕ Nuevo aviso</button>
+          <button class="btn btn-orange" onclick="showSection('ticker');setTimeout(()=>openModal('modal-ticker'),100)">📌 Nuevo ticker</button>
+          <button class="btn btn-secondary" onclick="loadData()">🔄 Actualizar datos</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AVISOS ══ -->
+    <div id="section-avisos" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📢 Gestión de Avisos</span>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-aviso')">➕ Nuevo aviso</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="avisos-table" id="tabla-avisos">
+            <thead><tr>
+              <th>ID</th><th>Categoría</th><th>Título</th>
+              <th>Vigencia</th><th>Estado</th><th>Activo</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-avisos">
+              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Conecta el sistema para cargar avisos</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TICKER ══ -->
+    <div id="section-ticker" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📌 Mensajes del Ticker</span>
+          <button class="btn btn-orange btn-sm" onclick="openModal('modal-ticker')">➕ Nuevo ticker</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="avisos-table" id="tabla-ticker">
+            <thead><tr><th>Texto</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Activo</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-ticker">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Conecta el sistema para cargar tickers</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EVENTOS ══ -->
+    <div id="section-eventos" class="tab-panel">
+      <div class="card">
+        <div class="card-header"><span class="card-title">📅 Calendario Escolar 2025–2026</span></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Eventos integrados automáticamente del Calendario Escolar IEA y publicados en pantalla según la fecha.</p>
+          <div id="lista-eventos" class="event-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PRESTACIONES ══ -->
+    <div id="section-prestaciones" class="tab-panel">
+      <div class="card">
+        <div class="card-header"><span class="card-title">💰 Calendario de Prestaciones 2025–2026</span></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Las prestaciones se publican automáticamente en la quincena correspondiente.</p>
+          <div id="lista-prestaciones"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CUMPLEAÑOS ══ -->
+    <div id="section-cumpleanos" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🎂 Cumpleaños del Personal</span>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-bday')">➕ Agregar</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="avisos-table">
+            <thead><tr><th>Nombre</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-bdays">
+              <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text3)">Sin datos</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FONDOS / TEMPORADAS ══ -->
+    <div id="section-temporadas" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+            <span class="card-title">🎨 Fondos por Temporada</span>
+            <button class="btn btn-secondary btn-sm" onclick="resetSeason()">↺ Automático</button>
+          </div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Selecciona un fondo manual o deja que cambie automáticamente según el calendario.</p>
+          <div class="season-grid" id="season-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CONFIG ══ -->
+    <div id="section-config" class="tab-panel">
+      <div class="card">
+        <div class="card-header"><span class="card-title">⚙️ Configuración del Sistema</span></div>
+        <div class="card-body">
+          <div class="form-row single"><div class="form-group">
+            <label>URL del Web App (Google Apps Script)</label>
+            <input type="text" id="cfg-script-url" placeholder="https://script.google.com/macros/s/.../exec">
+          </div></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre de la institución</label>
+              <input type="text" id="cfg-nombre" value="Delegación Sindical D-II-50">
+            </div>
+            <div class="form-group">
+              <label>Intervalo de actualización (segundos)</label>
+              <input type="number" id="cfg-intervalo" value="120">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar configuración</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<!-- ══ MODALES ══ -->
+
+<!-- Modal Nuevo Aviso -->
+<div class="modal-overlay" id="modal-aviso">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📢 Nuevo Aviso</div>
+      <button class="modal-close" onclick="closeModal('modal-aviso')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoría *</label>
+        <select id="av-cat">
+          <option>Comunicado Oficial</option>
+          <option>Recursos Humanos</option>
+          <option>Servicios Generales</option>
+          <option>Sindicato</option>
+          <option>Prestaciones</option>
+          <option>Académico</option>
+          <option>Urgente</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Activo desde ahora</label>
+        <div class="checkbox-row" style="margin-top:8px"><label class="toggle"><input type="checkbox" id="av-activo" checked><span class="toggle-slider"></span></label><span>Publicar inmediatamente</span></div>
+      </div>
+    </div>
+    <div class="form-row single"><div class="form-group">
+      <label>Título del aviso *</label>
+      <input type="text" id="av-titulo" placeholder="Ej: Reunión de Coordinación Mensual">
+    </div></div>
+    <div class="form-row single"><div class="form-group">
+      <label>Descripción / Detalle</label>
+      <textarea id="av-detalle" placeholder="Describe el aviso con más detalle..."></textarea>
+    </div></div>
+    <div class="form-row single"><div class="form-group">
+      <label>Fecha a mostrar en pantalla</label>
+      <input type="text" id="av-fecha-disp" placeholder="Ej: Viernes 28 de marzo · 10:00 hrs">
+    </div></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fecha de inicio (opcional)</label>
+        <input type="date" id="av-inicio">
+      </div>
+      <div class="form-group">
+        <label>Fecha de fin (opcional)</label>
+        <input type="date" id="av-fin">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="guardarAviso()">💾 Publicar aviso</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-aviso')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nuevo Ticker -->
+<div class="modal-overlay" id="modal-ticker">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📌 Nuevo mensaje de Ticker</div>
+      <button class="modal-close" onclick="closeModal('modal-ticker')">✕</button>
+    </div>
+    <div class="form-row single"><div class="form-group">
+      <label>Texto del ticker *</label>
+      <input type="text" id="tk-texto" placeholder="Ej: 🎉 Suspensión de labores el viernes 28 de marzo">
+    </div></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Mostrar desde</label>
+        <input type="date" id="tk-inicio">
+      </div>
+      <div class="form-group">
+        <label>Mostrar hasta</label>
+        <input type="date" id="tk-fin">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-orange" onclick="guardarTicker()">📌 Publicar ticker</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-ticker')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cumpleaños -->
+<div class="modal-overlay" id="modal-bday">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🎂 Agregar Cumpleaños</div>
+      <button class="modal-close" onclick="closeModal('modal-bday')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre completo *</label>
+        <input type="text" id="bd-nombre" placeholder="Nombre Apellido">
+      </div>
+      <div class="form-group">
+        <label>Fecha de cumpleaños</label>
+        <input type="text" id="bd-fecha" placeholder="DD/MM  ej: 15/03">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="guardarBday()">💾 Guardar</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-bday')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATOS DEL CALENDARIO ESCOLAR 2025-2026
+// ═══════════════════════════════════════════
+const EVENTOS_CALENDARIO = [
+  // AGOSTO 2025
+  {fecha:'2025-08-18', tipo:'inicio', texto:'Inicio del Ciclo Escolar 2025-2026', color:'#2E7D32'},
+  {fecha:'2025-08-25', tipo:'cte', texto:'Consejo Técnico Escolar — Fase Intensiva', color:'#E8650A'},
+  {fecha:'2025-08-26', tipo:'cte', texto:'Consejo Técnico Escolar — Fase Intensiva', color:'#E8650A'},
+  {fecha:'2025-08-27', tipo:'cte', texto:'Consejo Técnico Escolar — Fase Intensiva', color:'#E8650A'},
+  // SEPTIEMBRE 2025
+  {fecha:'2025-09-01', tipo:'festivo', texto:'Día festivo — Sin clases', color:'#C0181A'},
+  {fecha:'2025-09-16', tipo:'conmem', texto:'Día de la Independencia — Día conmemorativo', color:'#6A1B9A'},
+  {fecha:'2025-09-26', tipo:'cte', texto:'Consejo Técnico Escolar — Sesión Ordinaria', color:'#E8650A'},
+  // OCTUBRE 2025
+  {fecha:'2025-10-31', tipo:'suspension', texto:'Suspensión de labores docentes', color:'#C0181A'},
+  // NOVIEMBRE 2025
+  {fecha:'2025-11-10', tipo:'conmem', texto:'Día de la Revolución Mexicana — Día conmemorativo', color:'#6A1B9A'},
+  {fecha:'2025-11-14', tipo:'receso', texto:'Receso de clases', color:'#1E6BB5'},
+  {fecha:'2025-11-17', tipo:'cte', texto:'Consejo Técnico Escolar — Sesión Ordinaria', color:'#E8650A'},
+  {fecha:'2025-11-24', tipo:'suspension', texto:'Suspensión de labores — Jornada de concientización', color:'#C0181A'},
+  {fecha:'2025-11-25', tipo:'suspension', texto:'Suspensión de labores — Jornada de concientización', color:'#C0181A'},
+  {fecha:'2025-11-26', tipo:'suspension', texto:'Suspensión de labores — Jornada de concientización', color:'#C0181A'},
+  {fecha:'2025-11-27', tipo:'suspension', texto:'Suspensión de labores — Jornada de concientización', color:'#C0181A'},
+  {fecha:'2025-11-28', tipo:'suspension', texto:'Suspensión de labores — Jornada de concientización', color:'#C0181A'},
+  // DICIEMBRE 2025
+  {fecha:'2025-12-22', tipo:'vacaciones', texto:'Inicio de Vacaciones de Invierno', color:'#1E6BB5'},
+  {fecha:'2025-12-23', tipo:'vacaciones', texto:'Vacaciones de Invierno', color:'#1E6BB5'},
+  {fecha:'2025-12-24', tipo:'vacaciones', texto:'Vacaciones de Invierno — Nochebuena', color:'#1E6BB5'},
+  {fecha:'2025-12-25', tipo:'vacaciones', texto:'Vacaciones de Invierno — Navidad', color:'#1E6BB5'},
+  {fecha:'2025-12-26', tipo:'vacaciones', texto:'Vacaciones de Invierno', color:'#1E6BB5'},
+  {fecha:'2025-12-29', tipo:'vacaciones', texto:'Vacaciones de Invierno', color:'#1E6BB5'},
+  {fecha:'2025-12-30', tipo:'vacaciones', texto:'Vacaciones de Invierno', color:'#1E6BB5'},
+  {fecha:'2025-12-31', tipo:'vacaciones', texto:'Vacaciones de Invierno — Fin de año', color:'#1E6BB5'},
+  // ENERO 2026
+  {fecha:'2026-01-01', tipo:'vacaciones', texto:'Vacaciones de Invierno — Año Nuevo', color:'#1E6BB5'},
+  {fecha:'2026-01-02', tipo:'vacaciones', texto:'Vacaciones de Invierno', color:'#1E6BB5'},
+  {fecha:'2026-01-05', tipo:'regreso', texto:'Regreso a clases — Fin de vacaciones de invierno', color:'#2E7D32'},
+  {fecha:'2026-01-08', tipo:'cte', texto:'Consejo Técnico Escolar — Sesión Ordinaria', color:'#E8650A'},
+  {fecha:'2026-01-09', tipo:'calificaciones', texto:'Registro y comunicación de resultados de evaluación', color:'#00695C'},
+  {fecha:'2026-01-30', tipo:'conmem', texto:'Día conmemorativo', color:'#6A1B9A'},
+  // FEBRERO 2026
+  {fecha:'2026-02-02', tipo:'suspension', texto:'Suspensión de labores docentes', color:'#C0181A'},
+  {fecha:'2026-02-09', tipo:'calificaciones', texto:'Registro de calificaciones', color:'#00695C'},
+  {fecha:'2026-02-16', tipo:'cte', texto:'Consejo Técnico Escolar — Sesión Ordinaria', color:'#E8650A'},
+  {fecha:'2026-02-27', tipo:'suspension', texto:'Suspensión de labores — Jornada de concientización', color:'#C0181A'},
+  {fecha:'2026-02-28', tipo:'suspension', texto:'Suspensión de labores — Jornada de concientización', color:'#C0181A'},
+  // MARZO 2026
+  {fecha:'2026-03-13', tipo:'receso', texto:'Receso de clases', color:'#1E6BB5'},
+  {fecha:'2026-03-16', tipo:'cte', texto:'Consejo Técnico Escolar — Sesión Ordinaria', color:'#E8650A'},
+  {fecha:'2026-03-21', tipo:'festivo', texto:'Natalicio de Benito Juárez — Día festivo', color:'#C0181A'},
+  // ABRIL 2026
+  {fecha:'2026-04-02', tipo:'suspension', texto:'Suspensión de labores docentes', color:'#C0181A'},
+  {fecha:'2026-04-03', tipo:'suspension', texto:'Suspensión de labores docentes', color:'#C0181A'},
+  {fecha:'2026-04-06', tipo:'vacaciones', texto:'Inicio de Vacaciones de Semana Santa', color:'#1E6BB5'},
+  {fecha:'2026-04-07', tipo:'vacaciones', texto:'Vacaciones de Semana Santa', color:'#1E6BB5'},
+  {fecha:'2026-04-08', tipo:'vacaciones', texto:'Vacaciones de Semana Santa', color:'#1E6BB5'},
+  {fecha:'2026-04-09', tipo:'vacaciones', texto:'Vacaciones de Semana Santa — Jueves Santo', color:'#1E6BB5'},
+  {fecha:'2026-04-10', tipo:'vacaciones', texto:'Vacaciones de Semana Santa — Viernes Santo', color:'#1E6BB5'},
+  {fecha:'2026-04-13', tipo:'regreso', texto:'Regreso a clases — Fin de Semana Santa', color:'#2E7D32'},
+  // MAYO 2026
+  {fecha:'2026-05-01', tipo:'festivo', texto:'Día del Trabajo — Día festivo', color:'#C0181A'},
+  {fecha:'2026-05-05', tipo:'conmem', texto:'Batalla de Puebla — Día conmemorativo', color:'#6A1B9A'},
+  {fecha:'2026-05-15', tipo:'conmem', texto:'Día del Maestro 🍎', color:'#6A1B9A'},
+  {fecha:'2026-05-19', tipo:'calificaciones', texto:'Preinscripción a Preescolar, Primaria y Secundaria 2026-2027', color:'#00695C'},
+  {fecha:'2026-05-29', tipo:'suspension', texto:'Suspensión de labores — Jornada de concientización', color:'#C0181A'},
+  // JUNIO 2026
+  {fecha:'2026-06-01', tipo:'conmem', texto:'Día de la Marina', color:'#6A1B9A'},
+  {fecha:'2026-06-26', tipo:'suspension', texto:'Suspensión de labores docentes', color:'#C0181A'},
+  // JULIO 2026
+  {fecha:'2026-07-14', tipo:'fin', texto:'Fin del Ciclo Escolar 2025-2026', color:'#8B0E10'},
+  {fecha:'2026-07-15', tipo:'vacaciones', texto:'Inicio de Vacaciones de Verano', color:'#1E6BB5'},
+  {fecha:'2026-07-16', tipo:'vacaciones', texto:'Vacaciones de Verano', color:'#1E6BB5'},
+  {fecha:'2026-07-17', tipo:'vacaciones', texto:'Vacaciones de Verano', color:'#1E6BB5'},
+  {fecha:'2026-07-18', tipo:'vacaciones', texto:'Vacaciones de Verano', color:'#1E6BB5'},
+];
+
+// ═══════════════════════════════════════════
+//  PRESTACIONES POR QUINCENA
+// ═══════════════════════════════════════════
+const PRESTACIONES = [
+  // dateStart/dateEnd = ventana de visualización (8 días antes del pago)
+  // pago = primera fecha de dispersión ordinaria
+  // ── 2025 (estimadas) ──
+  {mes:'Agosto 2025',     quincena:'1ª quincena', dateStart:'2025-08-07', dateEnd:'2025-08-15', pago:'15 ago 2025',
+   items:['Organización de Ciclo Escolar (15d 07 Doc. E.B., 7d 07 PAAE E.B., 6d 07 Normales UPN y CAM)','Ayuda para Útiles Escolares: $2,800 PAAE E.B., 8d 07 no docentes','Bono Rezonificación 2012 y 2013','Beca Superación Profesional: $8,146.80 T.C.']},
+  {mes:'Agosto 2025',     quincena:'2ª quincena', dateStart:'2025-08-21', dateEnd:'2025-08-29', pago:'29 ago 2025',
+   items:['Bono Apoyo Material de Trabajo: $800 Intendencia E.B.','Compensación Nacional Única: $5,916.10 Doc. E.B., $3,714.87 PAAE E.B.','Medida Económica Contribuye a la Economía: $2,000']},
+  {mes:'Septiembre 2025', quincena:'1ª quincena', dateStart:'2025-09-07', dateEnd:'2025-09-15', pago:'15 sep 2025',
+   items:['Prima Vacacional: 4d 07 Docentes y PAEE E.B., 4d 07 Normales UPN y CAM','Apoyo a la Economía Familiar','Bono Superación Académica Superior: $3,968.10 T.C., $2,314.30 (20-39.5h), $1,690.05 (≤19.5h)','Superación Académica PAAE: $125 Prim., $160 Sec., $300 Bach., $500 Lic.']},
+  {mes:'Octubre 2025',    quincena:'1ª quincena', dateStart:'2025-10-07', dateEnd:'2025-10-15', pago:'15 oct 2025',
+   items:['Ayuda para Transporte: 5d 07 Docentes y PAEE E.B., 2d 07 Normales UPN y CAM']},
+  {mes:'Octubre 2025',    quincena:'2ª quincena', dateStart:'2025-10-23', dateEnd:'2025-10-31', pago:'31 oct 2025',
+   items:['Apoyo Local YL 2010: 9.36d 07 Docentes y PAEE E.B., 9.36d 07 Normales UPN y CAM','Fortalecimiento a la CPC (RZ): 94 días CP (Docentes), 94 días CT (PAAE)']},
+  {mes:'Noviembre 2025',  quincena:'1ª quincena', dateStart:'2025-11-06', dateEnd:'2025-11-14', pago:'14 nov 2025',
+   items:['Bono Superación Profesional: $665.42 PAAE E.B.']},
+  {mes:'Noviembre 2025',  quincena:'2ª quincena', dateStart:'2025-11-20', dateEnd:'2025-11-28', pago:'28 nov 2025',
+   items:['Ajuste de Calendario: 5d 07 Docentes y PAAE E.B.','Bono Integración Educativa (Ed. Especial): $1,850.05 Doc./Psic., $2,877.77 Dir., $3,704.06 Sup.','Superación Académica PAAE: $125 Prim., $160 Sec., $300 Bach., $500 Lic.']},
+  {mes:'Diciembre 2025',  quincena:'1ª quincena', dateStart:'2025-12-07', dateEnd:'2025-12-15', pago:'15 dic 2025',
+   items:['💰 AGUINALDO: 45 días Docentes y PAEE E.B., 45 días Normales UPN y CAM','Ajuste de Calendario: 6d 07 Normales UPN y CAM','Bono PAAE E.B.: $4,500','Bono Fin de Año: $3,600 no docentes','Bono Superación Académica Superior: $3,968.10 T.C.','Bono Homologados: $3,500 (CBTIS/CBTA/DGB/CECATI/CONALEP/CECYTEA)','Bono Jubilados: $5,000']},
+  // ── 2026 — Fechas exactas Anexo IX ──
+  {mes:'Enero 2026',      quincena:'1ª quincena', dateStart:'2026-01-06', dateEnd:'2026-01-14', pago:'14 ene 2026',
+   items:['💰 AGUINALDO: 45 días Docentes y PAEE E.B., 45 días Normales UPN y CAM']},
+  {mes:'Enero 2026',      quincena:'2ª quincena', dateStart:'2026-01-20', dateEnd:'2026-01-28', pago:'28 ene 2026',
+   items:['Apoyo Local YL 2007: 7.2d 07 Docentes y PAEE E.B.','Bono PAAE: $800 PAAE E.B.','Superación Académica PAAE: $125 Prim., $160 Sec., $300 Bach., $500 Lic.','Compensación Nacional Única: $5,916.10 Doc. E.B., $3,714.87 PAAE E.B.']},
+  {mes:'Febrero 2026',    quincena:'1ª quincena', dateStart:'2026-02-04', dateEnd:'2026-02-12', pago:'12 feb 2026',
+   items:['Previsión Social Múltiple: 6d 07 Docentes y PAEE E.B., 6d 07 Normales UPN y CAM']},
+  {mes:'Febrero 2026',    quincena:'2ª quincena', dateStart:'2026-02-17', dateEnd:'2026-02-25', pago:'25 feb 2026',
+   items:['Superación Académica PAAE: $125 Prim., $160 Sec., $300 Bach., $500 Lic.']},
+  {mes:'Marzo 2026',      quincena:'1ª quincena', dateStart:'2026-03-02', dateEnd:'2026-03-10', pago:'10 mar 2026',
+   items:['Ayuda para Transporte: 5d 07 Docentes y PAEE E.B.','Bono Rezonificación Local 2011: 7.2d 07 Doc. y PAEE E.B., 7.2d 07 Normales UPN y CAM']},
+  {mes:'Marzo 2026',      quincena:'2ª quincena', dateStart:'2026-03-19', dateEnd:'2026-03-27', pago:'27 mar 2026',
+   items:['Superación Académica PAAE: $125 Prim., $160 Sec., $300 Bach., $500 Lic.']},
+  {mes:'Abril 2026',      quincena:'1ª quincena', dateStart:'2026-04-06', dateEnd:'2026-04-14', pago:'14 abr 2026',
+   items:['Sin prestaciones especiales esta quincena']},
+  {mes:'Abril 2026',      quincena:'2ª quincena', dateStart:'2026-04-20', dateEnd:'2026-04-28', pago:'28 abr 2026',
+   items:['Prima Vacacional: 5d 07 Docentes y PAEE E.B., 6d 07 Normales y CAM, 9 días UPN','Apoyo Local YL 2008: 7.2d 07 Doc. y PAEE E.B., 7.2d 07 Normales UPN y CAM']},
+  {mes:'Mayo 2026',       quincena:'1ª quincena', dateStart:'2026-05-05', dateEnd:'2026-05-13', pago:'13 may 2026',
+   items:['🍎 ESTÍMULO DÍA DEL MAESTRO: 15d 07 Doc. E.B. (plaza inicial primarias)','Estímulo al Desempeño: $3,537.44 PAEE E.B., $2,000 Docentes y no docentes Normales','Adquisición de Libros: $1,194.44 Normales, $402.90 CAM','Bono Homologados: $3,500 (CBTIS/CBTA/DGB/CECATI/CONALEP/CECYTEA)','Bono Jubilados: $5,000']},
+  {mes:'Mayo 2026',       quincena:'2ª quincena', dateStart:'2026-05-19', dateEnd:'2026-05-27', pago:'27 may 2026',
+   items:['Apoyo Local YL 2009: 10d 07 Docentes y PAEE E.B.','Superación Académica PAAE: $125 Prim., $160 Sec., $300 Bach., $500 Lic.']},
+  {mes:'Junio 2026',      quincena:'1ª quincena', dateStart:'2026-06-04', dateEnd:'2026-06-12', pago:'12 jun 2026',
+   items:['Sin prestaciones especiales esta quincena']},
+  {mes:'Junio 2026',      quincena:'2ª quincena', dateStart:'2026-06-18', dateEnd:'2026-06-26', pago:'26 jun 2026',
+   items:['Prima Vacacional de Verano: 8d 07 Doc. y PAEE E.B., 12d 07 Normales y CAM, 6d UPN']},
+  {mes:'Julio 2026',      quincena:'1ª quincena', dateStart:'2026-07-06', dateEnd:'2026-07-14', pago:'14 jul 2026',
+   items:['Sin prestaciones especiales esta quincena']},
+  {mes:'Julio 2026',      quincena:'2ª quincena', dateStart:'2026-07-21', dateEnd:'2026-07-29', pago:'29 jul 2026',
+   items:['Día del Empleado Administrativo: 15d 07 PAEE E.B., $3,100 no docentes Normales UPN y CAM','Superación Académica PAAE: $125 Prim., $160 Sec., $300 Bach., $500 Lic.']},
+  {mes:'Agosto 2026',     quincena:'1ª quincena', dateStart:'2026-08-04', dateEnd:'2026-08-12', pago:'12 ago 2026',
+   items:['Organización de Ciclo Escolar 2026-2027','Ayuda para Útiles Escolares']},
+  {mes:'Agosto 2026',     quincena:'2ª quincena', dateStart:'2026-08-19', dateEnd:'2026-08-27', pago:'27 ago 2026',
+   items:['Compensación Nacional Única','Medida Económica Contribuye a la Economía: $2,000']},
+  {mes:'Septiembre 2026', quincena:'1ª quincena', dateStart:'2026-09-02', dateEnd:'2026-09-10', pago:'10 sep 2026',
+   items:['Prima Vacacional','Bono Superación Académica Superior']},
+  {mes:'Septiembre 2026', quincena:'2ª quincena', dateStart:'2026-09-20', dateEnd:'2026-09-28', pago:'28 sep 2026',
+   items:['Apoyo a la Economía Familiar','Superación Académica PAAE']},
+  {mes:'Octubre 2026',    quincena:'1ª quincena', dateStart:'2026-10-04', dateEnd:'2026-10-12', pago:'12 oct 2026',
+   items:['Ayuda para Transporte']},
+  {mes:'Octubre 2026',    quincena:'2ª quincena', dateStart:'2026-10-20', dateEnd:'2026-10-28', pago:'28 oct 2026',
+   items:['Apoyo Local YL 2010','Fortalecimiento a la CPC (RZ)']},
+  {mes:'Noviembre 2026',  quincena:'1ª quincena', dateStart:'2026-11-02', dateEnd:'2026-11-10', pago:'10 nov 2026',
+   items:['Bono Superación Profesional PAAE E.B.','1ª Parte Aguinaldo — dispersión: 13 nov 2026']},
+  {mes:'Noviembre 2026',  quincena:'2ª quincena', dateStart:'2026-11-18', dateEnd:'2026-11-26', pago:'26 nov 2026',
+   items:['Ajuste de Calendario','Bono Integración Educativa','Superación Académica PAAE']},
+  {mes:'Diciembre 2026',  quincena:'1ª quincena', dateStart:'2026-12-03', dateEnd:'2026-12-11', pago:'11 dic 2026',
+   items:['💰 AGUINALDO 1ª Parte — dispersión: 7 y 8 dic 2026','Bono PAAE E.B.','Bono Fin de Año','Bono Homologados: $3,500','Bono Jubilados: $5,000']},
+  {mes:'Diciembre 2026',  quincena:'2ª quincena', dateStart:'2026-12-03', dateEnd:'2026-12-11', pago:'11 dic 2026',
+   items:['💰 AGUINALDO 2ª Parte — dispersión: 6 ene 2027','Bono Superación Académica Superior']},
+];
+
+// ═══════════════════════════════════════════
+//  TEMPORADAS / FONDOS
+// ═══════════════════════════════════════════
+const TEMPORADAS = [
+  {id:'regreso', label:'Regreso a clases', emoji:'📚', color:'#1E6BB5', range:'Ago–Sep 2025',
+   gradient:'linear-gradient(135deg,#1565C0,#1E88E5,#42A5F5)'},
+  {id:'otono', label:'Otoño escolar', emoji:'🍂', color:'#E65100', range:'Oct–Nov 2025',
+   gradient:'linear-gradient(135deg,#BF360C,#E64A19,#FF7043)'},
+  {id:'navidad', label:'Navidad / Fin de año', emoji:'🎄', color:'#1B5E20', range:'Dic 2025',
+   gradient:'linear-gradient(135deg,#1B5E20,#C62828,#F57F17)'},
+  {id:'invierno', label:'Invierno / Enero', emoji:'❄️', color:'#0D47A1', range:'Ene 2026',
+   gradient:'linear-gradient(135deg,#0D47A1,#1976D2,#90CAF9)'},
+  {id:'primavera', label:'Primavera', emoji:'🌸', color:'#AD1457', range:'Feb–Mar 2026',
+   gradient:'linear-gradient(135deg,#880E4F,#E91E63,#F48FB1)'},
+  {id:'semana-santa', label:'Semana Santa', emoji:'✝️', color:'#4A148C', range:'Abr 2026',
+   gradient:'linear-gradient(135deg,#4A148C,#7B1FA2,#CE93D8)'},
+  {id:'maestros', label:'Día del Maestro', emoji:'🍎', color:'#E65100', range:'May 2026',
+   gradient:'linear-gradient(135deg,#E65100,#F57C00,#FFB74D)'},
+  {id:'verano', label:'Fin de ciclo / Verano', emoji:'☀️', color:'#F57F17', range:'Jun–Jul 2026',
+   gradient:'linear-gradient(135deg,#F57F17,#FBC02D,#FFF176)'},
+  {id:'sindical', label:'Institucional SNTE', emoji:'✊', color:'#C0181A', range:'Todo el año',
+   gradient:'linear-gradient(135deg,#8B0E10,#C0181A,#E8650A)'},
+];
+
+// ═══════════════════════════════════════════
+//  ESTADO Y CONFIG
+// ═══════════════════════════════════════════
+let SCRIPT_URL = localStorage.getItem('scriptUrl') || '';
+let remoteData = null;
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+window.onload = () => {
+  document.getElementById('script-url-input').value = SCRIPT_URL;
+  document.getElementById('cfg-script-url').value = SCRIPT_URL;
+  renderEventos();
+  renderPrestaciones();
+  renderTemporadas();
+  if (SCRIPT_URL) loadData();
+  updateDashboardLocal();
+};
+
+// ═══════════════════════════════════════════
+//  NAVEGACIÓN
+// ═══════════════════════════════════════════
+function showSection(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  event.currentTarget && event.currentTarget.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+  });
+}
+
+// ═══════════════════════════════════════════
+//  CONEXIÓN A APPS SCRIPT
+// ═══════════════════════════════════════════
+function saveScriptUrl() {
+  const url = document.getElementById('script-url-input').value.trim();
+  SCRIPT_URL = url;
+  localStorage.setItem('scriptUrl', url);
+  document.getElementById('cfg-script-url').value = url;
+  loadData();
+  toast('URL guardada. Conectando...', 'success');
+}
+
+async function loadData() {
+  if (!SCRIPT_URL) { setStatus(false); return; }
+  try {
+    const d = await jsonp(SCRIPT_URL + '?action=getData');
+    if (d.error) throw new Error(d.error);
+    remoteData = d;
+    setStatus(true);
+    renderAvisosTable(d.avisos || []);
+    renderTickerTable(d.ticker || []);
+    renderBdaysTable(d.cumpleanos || []);
+    updateStats(d);
+    updateDashboardLocal();
+  } catch(e) {
+    setStatus(false);
+    console.warn('Error cargando:', e);
+  }
+}
+
+function setStatus(online) {
+  const dot = document.getElementById('conn-dot');
+  const lbl = document.getElementById('conn-label');
+  dot.className = 'dot ' + (online ? 'online' : 'offline');
+  lbl.textContent = online ? 'Conectado a Google Sheets' : 'Sin conexión';
+}
+
+// ═══════════════════════════════════════════
+//  STATS Y DASHBOARD
+// ═══════════════════════════════════════════
+function updateStats(d) {
+  const now = new Date();
+  const hoy = now.toISOString().split('T')[0];
+  const active = (d.avisos||[]).filter(a => a.titulo).length;
+  const tickers = (d.ticker||[]).length;
+  document.getElementById('stat-avisos').textContent = active;
+  document.getElementById('stat-ticker').textContent = tickers;
+}
+
+function updateDashboardLocal() {
+  const now = new Date();
+  const hoy = now.toISOString().split('T')[0];
+  const hoyMes = now.getMonth()+1;
+  const hoyDia = now.getDate();
+
+  // Eventos de hoy
+  const eventosHoy = EVENTOS_CALENDARIO.filter(e => e.fecha === hoy);
+  document.getElementById('stat-eventos').textContent = eventosHoy.length;
+
+  const evEl = document.getElementById('hoy-eventos');
+  if (eventosHoy.length) {
+    evEl.innerHTML = eventosHoy.map(e => `
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding:10px;background:#f9f9f9;border-radius:8px;border-left:3px solid ${e.color}">
+        <div style="width:10px;height:10px;border-radius:50%;background:${e.color};margin-top:3px;flex-shrink:0"></div>
+        <div>
+          <div style="font-size:14px;font-weight:600">${e.texto}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">${formatTipo(e.tipo)}</div>
+        </div>
+      </div>`).join('');
+  } else {
+    evEl.innerHTML = '<p style="color:var(--text3);font-size:14px">No hay eventos especiales hoy.</p>';
+  }
+
+  // Prestaciones actuales
+  const prestActual = PRESTACIONES.filter(p => hoy >= p.dateStart && hoy <= p.dateEnd);
+  const el = document.getElementById('hoy-prestaciones');
+  if (prestActual.length) {
+    el.innerHTML = prestActual.map(p => `
+      <div style="background:linear-gradient(135deg,#E65100,#F57C00);border-radius:8px;padding:14px;color:white;margin-bottom:10px">
+        <div style="font-size:16px;font-weight:700">${p.mes} — ${p.quincena}</div>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">
+          ${p.pago ? `<div style="background:rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:12px;font-weight:700;margin-bottom:4px">💳 Fecha de pago: ${p.pago}</div>` : ''}
+          ${p.items.slice(0,3).map(i=>`<div style="background:rgba(255,255,255,0.2);border-radius:4px;padding:5px 8px;font-size:12px">${i}</div>`).join('')}
+          ${p.items.length>3?`<div style="font-size:11px;opacity:0.8">+ ${p.items.length-3} más...</div>`:''}
+        </div>
+      </div>`).join('');
+  } else {
+    const prox = PRESTACIONES.find(p => p.dateStart > hoy);
+    el.innerHTML = prox
+      ? `<p style="font-size:14px;color:var(--text2)">No hay quincena activa ahora.<br><br>Próxima: <strong>${prox.mes} — ${prox.quincena}</strong> (${formatDate(prox.dateStart)})</p>`
+      : '<p style="color:var(--text3);font-size:14px">Sin prestaciones próximas.</p>';
+  }
+
+  // Stat cumpleaños — usamos los del remoteData si hay
+  const bdHoy = (remoteData && remoteData.cumpleanos || []).filter(b => {
+    const [d2,m2] = b.fecha.split('/').map(Number);
+    return d2 === hoyDia && m2 === hoyMes;
+  });
+  document.getElementById('stat-bdays').textContent = bdHoy.length;
+}
+
+// ═══════════════════════════════════════════
+//  RENDER TABLAS
+// ═══════════════════════════════════════════
+function renderAvisosTable(avisos) {
+  const tbody = document.getElementById('tbody-avisos');
+  if (!avisos.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Sin avisos</td></tr>'; return; }
+  const now = new Date().toISOString().split('T')[0];
+  tbody.innerHTML = avisos.map((a,i) => {
+    const estado = !a.activo ? 'inactive' : (a.fechaFin && a.fechaFin < now ? 'vencido' : (a.fechaIni && a.fechaIni > now ? 'pendiente' : 'active'));
+    const estadoLabel = {active:'Activo',inactive:'Inactivo',vencido:'Vencido',pendiente:'Pendiente'}[estado];
+    return `<tr>
+      <td style="font-size:12px;color:var(--text3)">${a.id||i+1}</td>
+      <td><span class="badge badge-cat">${a.categoria||'—'}</span></td>
+      <td><strong>${a.titulo||'—'}</strong><br><span style="font-size:12px;color:var(--text3)">${(a.detalle||'').substring(0,60)}${(a.detalle||'').length>60?'...':''}</span></td>
+      <td style="font-size:12px">${a.fechaIni||'Inmediato'}<br>→ ${a.fechaFin||'Indefinido'}</td>
+      <td><span class="badge badge-${estado}">${estadoLabel}</span></td>
+      <td><label class="toggle"><input type="checkbox" ${a.activo?'checked':''} onchange="toggleAviso(${a.id||i+1},this.checked)"><span class="toggle-slider"></span></label></td>
+      <td><button class="btn btn-sm btn-danger" onclick="borrarAviso(${a.id||i+1})">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTickerTable(tickers) {
+  const tbody = document.getElementById('tbody-ticker');
+  if (!tickers.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Sin tickers</td></tr>'; return; }
+  const now = new Date().toISOString().split('T')[0];
+  tbody.innerHTML = tickers.map((t,i) => {
+    const activo = t.activo !== false;
+    const vencido = t.fechaFin && t.fechaFin < now;
+    return `<tr>
+      <td><strong>${t.texto}</strong></td>
+      <td style="font-size:12px">${t.fechaIni||'—'}</td>
+      <td style="font-size:12px">${t.fechaFin||'—'}</td>
+      <td><span class="badge badge-${vencido?'vencido':activo?'active':'inactive'}">${vencido?'Vencido':activo?'Activo':'Inactivo'}</span></td>
+      <td><label class="toggle"><input type="checkbox" ${activo?'checked':''} onchange="toggleTicker(${i+1},this.checked)"><span class="toggle-slider"></span></label></td>
+      <td><button class="btn btn-sm btn-danger" onclick="borrarTicker(${i+1})">🗑 Borrar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderBdaysTable(bdays) {
+  const tbody = document.getElementById('tbody-bdays');
+  if (!bdays.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text3)">Sin cumpleaños registrados</td></tr>'; return; }
+  const now = new Date();
+  const hoyStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}`;
+  tbody.innerHTML = bdays.map((b,i) => `<tr>
+    <td><strong>${b.nombre}</strong></td>
+    <td>${b.fecha} ${b.fecha===hoyStr?'🎂':''}</td>
+    <td><span class="badge badge-${b.activo!==false?'active':'inactive'}">${b.activo!==false?'Activo':'Inactivo'}</span></td>
+    <td><button class="btn btn-sm btn-danger" onclick="borrarBday(${i})">🗑</button></td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════
+//  EVENTOS Y PRESTACIONES
+// ═══════════════════════════════════════════
+function renderEventos() {
+  const el = document.getElementById('lista-eventos');
+  const now = new Date().toISOString().split('T')[0];
+  const sorted = [...EVENTOS_CALENDARIO].sort((a,b) => a.fecha.localeCompare(b.fecha));
+  el.innerHTML = sorted.map(e => {
+    const isPast = e.fecha < now;
+    const isToday = e.fecha === now;
+    return `<div class="event-item" style="opacity:${isPast?0.45:1};${isToday?'background:#FFF8E1;border-color:var(--amber)':''}">
+      <div class="event-dot" style="background:${e.color}"></div>
+      <div class="event-date">${formatDate(e.fecha)}</div>
+      <div>
+        <div class="event-text">${e.texto}${isToday?' ← HOY':''}</div>
+        <div class="event-tipo" style="color:${e.color}">${formatTipo(e.tipo)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPrestaciones() {
+  const el = document.getElementById('lista-prestaciones');
+  const now = new Date().toISOString().split('T')[0];
+  el.innerHTML = PRESTACIONES.map(p => {
+    const isActive = now >= p.dateStart && now <= p.dateEnd;
+    const isPast = now > p.dateEnd;
+    const bgCard = isActive ? 'linear-gradient(135deg,#E65100,#F57C00)' : isPast ? '#eee' : 'linear-gradient(135deg,#1565C0,#1E88E5)';
+    const txtClr = isPast ? '#666' : 'white';
+    const rowBg  = isPast ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)';
+    return `<div style="opacity:${isPast?0.55:1};margin-bottom:14px">
+      <div style="background:${bgCard};border-radius:10px;padding:16px;color:${txtClr};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-family:'Oswald',sans-serif;font-size:18px;font-weight:600">${p.mes} — ${p.quincena}</div>
+            <div style="font-size:12px;opacity:0.75;margin-top:2px">${formatDate(p.dateStart)} al ${formatDate(p.dateEnd)}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            ${isActive ? '<span style="background:rgba(255,255,255,0.35);padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700">● QUINCENA ACTIVA</span>' : ''}
+            ${p.pago ? `<span style="background:rgba(0,0,0,0.2);padding:4px 12px;border-radius:10px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px"><span>💳</span> Pago: ${p.pago}</span>` : ''}
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:5px">
+          ${p.items.map(item=>`<div style="background:${rowBg};border-radius:5px;padding:7px 10px;font-size:13px">${item}</div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTemporadas() {
+  const el = document.getElementById('season-grid');
+  el.innerHTML = TEMPORADAS.map(s => `
+    <div class="season-preview" onclick="selectSeason('${s.id}', this)">
+      <div class="preview-bg" style="background:${s.gradient}">${s.emoji}</div>
+      <div class="preview-label">${s.label}<br><span style="color:var(--text3);font-size:10px">${s.range}</span></div>
+    </div>`).join('');
+}
+
+const _bc = new BroadcastChannel('season_dii50');
+
+function selectSeason(id, el) {
+  document.querySelectorAll('.season-preview').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  localStorage.setItem('manualSeason', id);
+  _bc.postMessage({season: id});
+  const label = TEMPORADAS.find(s=>s.id===id)?.label || id;
+  toast('✅ Fondo aplicado: ' + label + ' — la pantalla se actualiza automáticamente', 'success');
+}
+
+function resetSeason() {
+  localStorage.removeItem('manualSeason');
+  _bc.postMessage({season: null});
+  document.querySelectorAll('.season-preview').forEach(e => e.classList.remove('selected'));
+  toast('↺ Fondo automático según temporada', '');
+}
+
+// ═══════════════════════════════════════════
+//  GUARDAR / ENVIAR A APPS SCRIPT
+// ═══════════════════════════════════════════
+// JSONP — evita restricciones CORS de Apps Script
+function jsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Math.random().toString(36).substr(2,8);
+    window[cbName] = (data) => {
+      delete window[cbName];
+      document.getElementById(cbName) && document.getElementById(cbName).remove();
+      resolve(data);
+    };
+    const s = document.createElement('script');
+    s.id = cbName;
+    s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
+    s.onerror = () => { delete window[cbName]; s.remove(); reject(new Error('JSONP error')); };
+    document.head.appendChild(s);
+    setTimeout(() => { if(window[cbName]){ delete window[cbName]; s.remove(); reject(new Error('Timeout')); } }, 10000);
+  });
+}
+
+async function callScript(action, payload) {
+  if (!SCRIPT_URL) { toast('Conecta primero el sistema', 'error'); return null; }
+  const params = new URLSearchParams({
+    action: action,
+    data: JSON.stringify(payload || {})
+  });
+  const url = SCRIPT_URL + '?' + params.toString();
+  return await jsonp(url);
+}
+
+async function guardarAviso() {
+  const titulo = document.getElementById('av-titulo').value.trim();
+  if (!titulo) { toast('El título es obligatorio', 'error'); return; }
+  const payload = {
+    categoria:    document.getElementById('av-cat').value,
+    titulo:       titulo,
+    detalle:      document.getElementById('av-detalle').value.trim(),
+    fechaDisplay: document.getElementById('av-fecha-disp').value.trim(),
+    fechaInicio:  document.getElementById('av-inicio').value,
+    fechaFin:     document.getElementById('av-fin').value,
+    activo:       document.getElementById('av-activo').checked,
+  };
+
+  // Si no hay conexión, guarda localmente y avisa
+  if (!SCRIPT_URL) {
+    toast('Sin conexión — aviso guardado localmente (configura la URL de Apps Script)', 'error');
+    closeModal('modal-aviso'); return;
+  }
+
+  try {
+    await callScript('saveAviso', payload);
+    closeModal('modal-aviso');
+    toast('✅ Aviso publicado correctamente', 'success');
+    setTimeout(loadData, 1000);
+  } catch(e) {
+    toast('Error al guardar: ' + e.message, 'error');
+  }
+}
+
+async function guardarTicker() {
+  const texto = document.getElementById('tk-texto').value.trim();
+  if (!texto) { toast('El texto es obligatorio', 'error'); return; }
+  const payload = {
+    texto:       texto,
+    fechaInicio: document.getElementById('tk-inicio').value,
+    fechaFin:    document.getElementById('tk-fin').value,
+  };
+  try {
+    await callScript('saveTicker', payload);
+    closeModal('modal-ticker');
+    toast('📌 Ticker publicado', 'success');
+    setTimeout(loadData, 1000);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function guardarBday() {
+  const nombre = document.getElementById('bd-nombre').value.trim();
+  const fecha  = document.getElementById('bd-fecha').value.trim();
+  if (!nombre || !fecha) { toast('Nombre y fecha son obligatorios', 'error'); return; }
+  try {
+    await callScript('saveBday', {nombre, fecha});
+    closeModal('modal-bday');
+    toast('🎂 Cumpleaños guardado', 'success');
+    setTimeout(loadData, 1000);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function toggleAviso(id, activo) {
+  try {
+    const r = await callScript('toggleAviso', {id: id, activo: activo});
+    if (r && r.ok !== false) {
+      toast(activo ? '✅ Aviso activado' : '⏸ Aviso desactivado');
+      setTimeout(loadData, 1500);
+    } else {
+      toast('Error al cambiar estado', 'error');
+    }
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function borrarAviso(id) {
+  if (!confirm('¿Desactivar este aviso?')) return;
+  try {
+    const r = await callScript('toggleAviso', {id: id, activo: false});
+    toast('🗑 Aviso desactivado');
+    setTimeout(loadData, 1500);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function borrarTicker(rowNum) {
+  if (!confirm('¿Eliminar este ticker?')) return;
+  try {
+    const r = await callScript('deleteTicker', {row: rowNum});
+    if (r && r.ok) {
+      toast('✅ Ticker eliminado');
+      setTimeout(loadData, 1500);
+    } else {
+      toast('Error al eliminar', 'error');
+    }
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function toggleTicker(rowNum, activo) {
+  try {
+    await callScript('toggleTicker', {row: rowNum, activo: activo});
+    toast(activo ? '✅ Ticker activado' : '⏸ Ticker desactivado');
+    setTimeout(loadData, 1500);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function borrarBday(idx) {
+  if (!confirm('¿Eliminar este cumpleaños?')) return;
+  try {
+    await callScript('deleteBday', {index: idx});
+    toast('Registro eliminado');
+    setTimeout(loadData, 1000);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function saveConfig() {
+  SCRIPT_URL = document.getElementById('cfg-script-url').value.trim();
+  localStorage.setItem('scriptUrl', SCRIPT_URL);
+  document.getElementById('script-url-input').value = SCRIPT_URL;
+  toast('⚙️ Configuración guardada', 'success');
+  if (SCRIPT_URL) loadData();
+}
+
+// ═══════════════════════════════════════════
+//  UTILIDADES UI
+// ═══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
+});
+
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const d = new Date(str + 'T12:00:00');
+  return d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function formatTipo(tipo) {
+  const map = {
+    inicio:'Inicio de ciclo', fin:'Fin de ciclo', vacaciones:'Vacaciones',
+    regreso:'Regreso a clases', festivo:'Día festivo', conmem:'Día conmemorativo',
+    suspension:'Suspensión de labores', cte:'Consejo Técnico Escolar',
+    receso:'Receso de clases', calificaciones:'Registro de calificaciones'
+  };
+  return map[tipo] || tipo;
+}
+
+// Auto-refresh cada 2 min
+setInterval(() => { if (SCRIPT_URL) loadData(); }, 120000);
+</script>
+</body>
+</html>
