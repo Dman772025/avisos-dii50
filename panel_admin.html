@@ -781,7 +781,7 @@ function renderAvisosTable(avisos) {
       <td style="font-size:12px">${a.fechaIni||'Inmediato'}<br>→ ${a.fechaFin||'Indefinido'}</td>
       <td><span class="badge badge-${estado}">${estadoLabel}</span></td>
       <td><label class="toggle"><input type="checkbox" ${a.activo?'checked':''} onchange="toggleAviso(${a.id||i+1},this.checked)"><span class="toggle-slider"></span></label></td>
-      <td><button class="btn btn-sm btn-danger" onclick="borrarAviso(${a.id||i+1})">🗑</button></td>
+      <td><button class="btn btn-sm btn-danger" onclick="borrarAviso(${a.id||i+1})" style="min-width:70px">🗑 Borrar</button></td>
     </tr>`;
   }).join('');
 }
@@ -798,8 +798,8 @@ function renderTickerTable(tickers) {
       <td style="font-size:12px">${t.fechaIni||'—'}</td>
       <td style="font-size:12px">${t.fechaFin||'—'}</td>
       <td><span class="badge badge-${vencido?'vencido':activo?'active':'inactive'}">${vencido?'Vencido':activo?'Activo':'Inactivo'}</span></td>
-      <td><label class="toggle"><input type="checkbox" ${activo?'checked':''} onchange="toggleTicker(${i+1},this.checked)"><span class="toggle-slider"></span></label></td>
-      <td><button class="btn btn-sm btn-danger" onclick="borrarTicker(${i+1})">🗑 Borrar</button></td>
+      <td><label class="toggle"><input type="checkbox" ${activo?'checked':''} onchange="toggleTicker(${i},this.checked)"><span class="toggle-slider"></span></label></td>
+      <td><button class="btn btn-sm btn-danger" onclick="borrarTicker(${i})">🗑 Borrar</button></td>
     </tr>`;
   }).join('');
 }
@@ -1003,10 +1003,10 @@ async function borrarAviso(id) {
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
-async function borrarTicker(rowNum) {
+async function borrarTicker(idx) {
   if (!confirm('¿Eliminar este ticker?')) return;
   try {
-    const r = await callScript('deleteTicker', {row: rowNum});
+    const r = await callScript('deleteTicker', {row: idx});
     if (r && r.ok) {
       toast('✅ Ticker eliminado');
       setTimeout(loadData, 4000);
@@ -1016,11 +1016,15 @@ async function borrarTicker(rowNum) {
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
-async function toggleTicker(rowNum, activo) {
+async function toggleTicker(idx, activo) {
   try {
-    await callScript('toggleTicker', {row: rowNum, activo: activo});
-    toast(activo ? '✅ Ticker activado' : '⏸ Ticker desactivado');
-    setTimeout(loadData, 4000);
+    const r = await callScript('toggleTicker', {row: idx, activo: activo});
+    if (r && r.ok) {
+      toast(activo ? '✅ Ticker activado' : '⏸ Ticker desactivado');
+      setTimeout(loadData, 4000);
+    } else {
+      toast('Error', 'error');
+    }
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
