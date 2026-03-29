@@ -948,7 +948,7 @@ async function guardarAviso() {
     await callScript('saveAviso', payload);
     closeModal('modal-aviso');
     toast('✅ Aviso publicado correctamente', 'success');
-    setTimeout(loadData, 1000);
+    setTimeout(loadData, 4000);
   } catch(e) {
     toast('Error al guardar: ' + e.message, 'error');
   }
@@ -966,7 +966,7 @@ async function guardarTicker() {
     await callScript('saveTicker', payload);
     closeModal('modal-ticker');
     toast('📌 Ticker publicado', 'success');
-    setTimeout(loadData, 1000);
+    setTimeout(loadData, 4000);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -978,7 +978,7 @@ async function guardarBday() {
     await callScript('saveBday', {nombre, fecha});
     closeModal('modal-bday');
     toast('🎂 Cumpleaños guardado', 'success');
-    setTimeout(loadData, 1000);
+    setTimeout(loadData, 4000);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -987,7 +987,7 @@ async function toggleAviso(id, activo) {
     const r = await callScript('toggleAviso', {id: id, activo: activo});
     if (r && r.ok !== false) {
       toast(activo ? '✅ Aviso activado' : '⏸ Aviso desactivado');
-      setTimeout(loadData, 1500);
+      setTimeout(loadData, 4000);
     } else {
       toast('Error al cambiar estado', 'error');
     }
@@ -999,7 +999,7 @@ async function borrarAviso(id) {
   try {
     const r = await callScript('toggleAviso', {id: id, activo: false});
     toast('🗑 Aviso desactivado');
-    setTimeout(loadData, 1500);
+    setTimeout(loadData, 4000);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -1009,7 +1009,7 @@ async function borrarTicker(rowNum) {
     const r = await callScript('deleteTicker', {row: rowNum});
     if (r && r.ok) {
       toast('✅ Ticker eliminado');
-      setTimeout(loadData, 1500);
+      setTimeout(loadData, 4000);
     } else {
       toast('Error al eliminar', 'error');
     }
@@ -1020,7 +1020,7 @@ async function toggleTicker(rowNum, activo) {
   try {
     await callScript('toggleTicker', {row: rowNum, activo: activo});
     toast(activo ? '✅ Ticker activado' : '⏸ Ticker desactivado');
-    setTimeout(loadData, 1500);
+    setTimeout(loadData, 4000);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -1029,7 +1029,7 @@ async function borrarBday(idx) {
   try {
     await callScript('deleteBday', {index: idx});
     toast('Registro eliminado');
-    setTimeout(loadData, 1000);
+    setTimeout(loadData, 4000);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
