@@ -770,20 +770,21 @@ function updateDashboardLocal() {
 function renderAvisosTable(avisos) {
   const tbody = document.getElementById('tbody-avisos');
   if (!avisos.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Sin avisos</td></tr>'; return; }
-  const now = new Date().toISOString().split('T')[0];
+  const nowStr = new Date().toISOString().split('T')[0];
   tbody.innerHTML = avisos.map((a,i) => {
-    const estado = !a.activo ? 'inactive' : (a.fechaFin && a.fechaFin < now ? 'vencido' : (a.fechaIni && a.fechaIni > now ? 'pendiente' : 'active'));
+    const aId = a.id !== undefined ? a.id : (i+1);
+    const estado = !a.activo ? 'inactive' : (a.fechaFin && a.fechaFin < nowStr ? 'vencido' : (a.fechaIni && a.fechaIni > nowStr ? 'pendiente' : 'active'));
     const estadoLabel = {active:'Activo',inactive:'Inactivo',vencido:'Vencido',pendiente:'Pendiente'}[estado];
     return `<tr>
-      <td style="font-size:12px;color:var(--text3)">${a.id||i+1}</td>
+      <td style="font-size:12px;color:var(--text3)">${aId}</td>
       <td><span class="badge badge-cat">${a.categoria||'—'}</span></td>
       <td><strong>${a.titulo||'—'}</strong><br><span style="font-size:12px;color:var(--text3)">${(a.detalle||'').substring(0,60)}${(a.detalle||'').length>60?'...':''}</span></td>
       <td style="font-size:12px">${a.fechaIni||'Inmediato'}<br>→ ${a.fechaFin||'Indefinido'}</td>
       <td><span class="badge badge-${estado}">${estadoLabel}</span></td>
-      <td><label class="toggle"><input type="checkbox" ${a.activo?'checked':''} onchange="toggleAviso(${a.id||i+1},this.checked)"><span class="toggle-slider"></span></label></td>
-      <td style="display:flex;gap:4px;flex-wrap:wrap">
-        <button class="btn btn-sm btn-secondary" onclick="editarAviso(${a.id||i+1},'${(a.categoria||'').replace(/'/g,"'")}','${(a.titulo||'').replace(/'/g,"'")}','${(a.detalle||'').replace(/'/g,"'")}','${a.fecha||''}')" style="font-size:11px">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="borrarAviso(${a.id||i+1})" style="font-size:11px">🗑</button>
+      <td><label class="toggle"><input type="checkbox" ${a.activo?'checked':''} onchange="toggleAviso('${aId}',this.checked)"><span class="toggle-slider"></span></label></td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-sm btn-secondary" onclick="editarAviso('${aId}')" style="font-size:11px;padding:4px 8px">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="borrarAvisoById('${aId}')" style="font-size:11px;padding:4px 8px">🗑</button>
       </td>
     </tr>`;
   }).join('');
@@ -988,34 +989,46 @@ async function guardarBday() {
 
 async function toggleAviso(id, activo) {
   try {
-    const r = await callScript('toggleAviso', {id: id, activo: activo});
+    const r = await callScript('toggleAviso', {id: String(id), activo: activo});
     if (r && r.ok !== false) {
       toast(activo ? '✅ Aviso activado' : '⏸ Aviso desactivado');
       setTimeout(loadData, 4000);
     } else {
-      toast('Error al cambiar estado', 'error');
+      toast('Error: ' + JSON.stringify(r), 'error');
+    }
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function borrarAvisoById(id) {
+  if (!confirm('¿Eliminar este aviso permanentemente?')) return;
+  try {
+    const r = await callScript('deleteAviso', {id: String(id)});
+    if (r && r.ok !== false) {
+      toast('🗑 Aviso eliminado');
+      setTimeout(loadData, 4000);
+    } else {
+      toast('Error: ' + JSON.stringify(r), 'error');
     }
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 async function borrarAviso(id) {
-  if (!confirm('¿Desactivar este aviso?')) return;
-  try {
-    const r = await callScript('toggleAviso', {id: id, activo: false});
-    toast('🗑 Aviso desactivado');
-    setTimeout(loadData, 4000);
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
+  borrarAvisoById(id);
 }
 
-function editarAviso(id, cat, titulo, detalle, fecha) {
-  // Llenar el modal con los datos actuales
-  document.getElementById('av-cat').value = cat || 'Comunicado Oficial';
-  document.getElementById('av-titulo').value = titulo || '';
-  document.getElementById('av-detalle').value = detalle || '';
-  document.getElementById('av-fecha-disp').value = fecha || '';
-  // Marcar como edición
+function editarAviso(id) {
+  // Buscar el aviso en los datos remotos
+  const aviso = remoteData && remoteData.avisos && remoteData.avisos.find(a => String(a.id) === String(id));
+  if (aviso) {
+    document.getElementById('av-cat').value = aviso.categoria || 'Comunicado Oficial';
+    document.getElementById('av-titulo').value = aviso.titulo || '';
+    document.getElementById('av-detalle').value = aviso.detalle || '';
+    document.getElementById('av-fecha-disp').value = aviso.fecha || '';
+    document.getElementById('av-inicio').value = aviso.fechaIni || '';
+    document.getElementById('av-fin').value = aviso.fechaFin || '';
+    document.getElementById('av-activo').checked = aviso.activo !== false;
+  }
   document.getElementById('av-titulo').dataset.editId = id;
-  // Cambiar título del modal
   document.querySelector('#modal-aviso .modal-title').textContent = '✏️ Editar Aviso #' + id;
   openModal('modal-aviso');
 }

@@ -1270,10 +1270,11 @@ async function loadData() {
       const autoAv = buildAutoAvisos();
       const allAvisos = [...autoAv, ...(d.avisos||[])];
       buildAvisos(allAvisos);
-      // Merge remote cumpleaños con staff local — remoto tiene prioridad
+      // Siempre usar staff local (121 personas) + extras del Sheet que no estén ya
       const remoteBdays = d.cumpleanos || [];
-      const mergedBdays = remoteBdays.length > 0 ? remoteBdays : CUMPLEANOS_STAFF;
-      buildBdays(mergedBdays);
+      const staffNames = new Set(CUMPLEANOS_STAFF.map(p => p.nombre.toLowerCase()));
+      const extras = remoteBdays.filter(p => !staffNames.has((p.nombre||'').toLowerCase()));
+      buildBdays([...CUMPLEANOS_STAFF, ...extras]);
       const tickerItems = (d.ticker && d.ticker.length) ? d.ticker : (d.avisos||[]);
       buildTicker(tickerItems);
       showStatus('online');
