@@ -677,6 +677,7 @@ function saveScriptUrl() {
 
 async function loadData() {
   if (!SCRIPT_URL) { setStatus(false); return; }
+  setStatus('loading');
   try {
     const d = await jsonp(SCRIPT_URL + '?action=getData');
     if (d.error) throw new Error(d.error);
@@ -689,15 +690,31 @@ async function loadData() {
     updateDashboardLocal();
   } catch(e) {
     setStatus(false);
-    console.warn('Error cargando:', e);
+    console.warn('Error cargando:', e.message);
+    // Retry automático en 15s si falla
+    setTimeout(loadData, 15000);
   }
 }
 
-function setStatus(online) {
+function setStatus(state) {
   const dot = document.getElementById('conn-dot');
   const lbl = document.getElementById('conn-label');
-  dot.className = 'dot ' + (online ? 'online' : 'offline');
-  lbl.textContent = online ? 'Conectado a Google Sheets' : 'Sin conexión';
+  if (state === true || state === 'online') {
+    dot.className = 'dot online';
+    dot.style.background = '#4CAF50';
+    lbl.textContent = 'Conectado a Google Sheets';
+    lbl.style.color = 'rgba(255,255,255,0.9)';
+  } else if (state === 'loading') {
+    dot.className = 'dot';
+    dot.style.background = '#FFC107';
+    lbl.textContent = 'Conectando...';
+    lbl.style.color = 'rgba(255,255,255,0.7)';
+  } else {
+    dot.className = 'dot offline';
+    dot.style.background = '#ccc';
+    lbl.textContent = 'Sin conexión — reintentando...';
+    lbl.style.color = 'rgba(255,255,255,0.5)';
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -811,15 +828,39 @@ function renderTickerTable(tickers) {
 
 function renderBdaysTable(bdays) {
   const tbody = document.getElementById('tbody-bdays');
-  if (!bdays.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text3)">Sin cumpleaños registrados</td></tr>'; return; }
+  if (!bdays.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text3)">Sin cumpleaños</td></tr>'; return; }
   const now = new Date();
-  const hoyStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}`;
-  tbody.innerHTML = bdays.map((b,i) => `<tr>
-    <td><strong>${b.nombre}</strong></td>
-    <td>${b.fecha} ${b.fecha===hoyStr?'🎂':''}</td>
-    <td><span class="badge badge-${b.activo!==false?'active':'inactive'}">${b.activo!==false?'Activo':'Inactivo'}</span></td>
-    <td><button class="btn btn-sm btn-danger" onclick="borrarBday(${i})">🗑</button></td>
-  </tr>`).join('');
+  const hoy = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}`;
+  
+  // Ordenar por proximidad
+  function diasParaCumple(fecha) {
+    if (!fecha) return 999;
+    const parts = String(fecha).split('/');
+    if (parts.length < 2) return 999;
+    const d = parseInt(parts[0]), m = parseInt(parts[1]);
+    const hoyD = now.getDate(), hoyM = now.getMonth()+1, hoyY = now.getFullYear();
+    let cumple = new Date(hoyY, m-1, d);
+    if (cumple < now) cumple = new Date(hoyY+1, m-1, d);
+    return Math.ceil((cumple - now) / 86400000);
+  }
+  
+  const sorted = [...bdays].sort((a,b) => diasParaCumple(a.fecha) - diasParaCumple(b.fecha));
+  
+  tbody.innerHTML = sorted.slice(0, 50).map((b,i) => {
+    const esHoy = b.fecha === hoy;
+    const dias  = diasParaCumple(b.fecha);
+    return `<tr style="${esHoy?'background:#FFF8E1;font-weight:bold':''}">
+      <td><strong>${b.nombre}</strong> ${esHoy?'🎂':''}</td>
+      <td>${b.fecha}</td>
+      <td style="font-size:12px;color:var(--text2)">${esHoy?'¡HOY!':dias+' días'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="borrarBday(${i})">🗑</button></td>
+    </tr>`;
+  }).join('');
+  
+  const extra = bdays.length - 50;
+  if (extra > 0) {
+    tbody.innerHTML += `<tr><td colspan="4" style="text-align:center;color:var(--text3);font-size:12px;padding:8px">... y ${extra} más</td></tr>`;
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -916,7 +957,7 @@ function jsonp(url) {
     s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
     s.onerror = () => { delete window[cbName]; s.remove(); reject(new Error('JSONP error')); };
     document.head.appendChild(s);
-    setTimeout(() => { if(window[cbName]){ delete window[cbName]; s.remove(); reject(new Error('Timeout')); } }, 10000);
+    setTimeout(() => { if(window[cbName]){ delete window[cbName]; s.remove(); reject(new Error('Timeout')); } }, 30000);
   });
 }
 
