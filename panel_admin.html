@@ -781,7 +781,10 @@ function renderAvisosTable(avisos) {
       <td style="font-size:12px">${a.fechaIni||'Inmediato'}<br>→ ${a.fechaFin||'Indefinido'}</td>
       <td><span class="badge badge-${estado}">${estadoLabel}</span></td>
       <td><label class="toggle"><input type="checkbox" ${a.activo?'checked':''} onchange="toggleAviso(${a.id||i+1},this.checked)"><span class="toggle-slider"></span></label></td>
-      <td><button class="btn btn-sm btn-danger" onclick="borrarAviso(${a.id||i+1})">🗑</button></td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-secondary" onclick="editarAviso(${a.id||i+1},'${(a.categoria||'').replace(/'/g,"'")}','${(a.titulo||'').replace(/'/g,"'")}','${(a.detalle||'').replace(/'/g,"'")}','${a.fecha||''}')" style="font-size:11px">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="borrarAviso(${a.id||i+1})" style="font-size:11px">🗑</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -793,13 +796,14 @@ function renderTickerTable(tickers) {
   tbody.innerHTML = tickers.map((t,i) => {
     const activo = t.activo !== false;
     const vencido = t.fechaFin && t.fechaFin < now;
+    const textoEnc = encodeURIComponent(t.texto||'');
     return `<tr>
       <td><strong>${t.texto}</strong></td>
       <td style="font-size:12px">${t.fechaIni||'—'}</td>
       <td style="font-size:12px">${t.fechaFin||'—'}</td>
       <td><span class="badge badge-${vencido?'vencido':activo?'active':'inactive'}">${vencido?'Vencido':activo?'Activo':'Inactivo'}</span></td>
-      <td><label class="toggle"><input type="checkbox" ${activo?'checked':''} onchange="toggleTicker(${i+1},this.checked)"><span class="toggle-slider"></span></label></td>
-      <td><button class="btn btn-sm btn-danger" onclick="borrarTicker(${i+1})">🗑 Borrar</button></td>
+      <td><label class="toggle"><input type="checkbox" ${activo?'checked':''} onchange="toggleTickerByTexto('${textoEnc}',this.checked)"><span class="toggle-slider"></span></label></td>
+      <td><button class="btn btn-sm btn-danger" onclick="borrarTickerByTexto('${textoEnc}')">🗑</button></td>
     </tr>`;
   }).join('');
 }
@@ -1003,26 +1007,47 @@ async function borrarAviso(id) {
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
-async function borrarTicker(rowNum) {
+function editarAviso(id, cat, titulo, detalle, fecha) {
+  // Llenar el modal con los datos actuales
+  document.getElementById('av-cat').value = cat || 'Comunicado Oficial';
+  document.getElementById('av-titulo').value = titulo || '';
+  document.getElementById('av-detalle').value = detalle || '';
+  document.getElementById('av-fecha-disp').value = fecha || '';
+  // Marcar como edición
+  document.getElementById('av-titulo').dataset.editId = id;
+  // Cambiar título del modal
+  document.querySelector('#modal-aviso .modal-title').textContent = '✏️ Editar Aviso #' + id;
+  openModal('modal-aviso');
+}
+
+async function borrarTickerByTexto(textoEnc) {
   if (!confirm('¿Eliminar este ticker?')) return;
   try {
-    const r = await callScript('deleteTicker', {row: rowNum});
+    const r = await callScript('deleteTickerByTexto', {texto: decodeURIComponent(textoEnc)});
     if (r && r.ok) {
       toast('✅ Ticker eliminado');
       setTimeout(loadData, 4000);
     } else {
-      toast('Error al eliminar', 'error');
+      toast('Error al eliminar: ' + (r&&r.error||''), 'error');
     }
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
-async function toggleTicker(rowNum, activo) {
+async function toggleTickerByTexto(textoEnc, activo) {
   try {
-    await callScript('toggleTicker', {row: rowNum, activo: activo});
-    toast(activo ? '✅ Ticker activado' : '⏸ Ticker desactivado');
-    setTimeout(loadData, 4000);
+    const r = await callScript('toggleTickerByTexto', {texto: decodeURIComponent(textoEnc), activo: activo});
+    if (r && r.ok) {
+      toast(activo ? '✅ Ticker activado' : '⏸ Ticker desactivado');
+      setTimeout(loadData, 4000);
+    } else {
+      toast('Error: ' + (r&&r.error||''), 'error');
+    }
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
+
+// Mantener compatibilidad
+async function borrarTicker(idx) { toast('Usa el botón 🗑 de la fila', 'error'); }
+async function toggleTicker(idx, activo) { toast('Usa el toggle de la fila', 'error'); }
 
 async function borrarBday(idx) {
   if (!confirm('¿Eliminar este cumpleaños?')) return;
