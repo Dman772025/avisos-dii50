@@ -853,7 +853,10 @@ function renderBdaysTable(bdays) {
       <td><strong>${b.nombre}</strong> ${esHoy?'🎂':''}</td>
       <td>${b.fecha}</td>
       <td style="font-size:12px;color:var(--text2)">${esHoy?'¡HOY!':dias+' días'}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="borrarBday(${i})">🗑</button></td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-sm btn-secondary" onclick="editarBday(${i},'${(b.nombre||'').replace(/'/g,'').replace(/&/g,'y')}','${b.fecha||''}')" style="font-size:11px;padding:4px 8px">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="borrarBday(${i})" style="font-size:11px;padding:4px 8px">🗑</button>
+      </td>
     </tr>`;
   }).join('');
   
