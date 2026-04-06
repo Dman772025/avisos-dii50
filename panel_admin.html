@@ -266,9 +266,12 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--red);}
     <!-- ══ EVENTOS ══ -->
     <div id="section-eventos" class="tab-panel">
       <div class="card">
-        <div class="card-header"><span class="card-title">📅 Calendario Escolar 2025–2026</span></div>
+        <div class="card-header">
+          <span class="card-title">📅 Calendario Escolar 2025–2026</span>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-evento')">➕ Agregar evento</button>
+        </div>
         <div class="card-body">
-          <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Eventos integrados automáticamente del Calendario Escolar IEA y publicados en pantalla según la fecha.</p>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Eventos del Calendario Escolar IEA. Se publican automáticamente en pantalla según la fecha.</p>
           <div id="lista-eventos" class="event-list"></div>
         </div>
       </div>
@@ -430,6 +433,45 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--red);}
   </div>
 </div>
 
+<!-- Modal Evento Calendario -->
+<div class="modal-overlay" id="modal-evento">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📅 Nuevo Evento</div>
+      <button class="modal-close" onclick="closeModal('modal-evento')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fecha *</label>
+        <input type="date" id="ev-fecha">
+      </div>
+      <div class="form-group">
+        <label>Tipo *</label>
+        <select id="ev-tipo">
+          <option value="festivo">Día festivo</option>
+          <option value="conmem">Día conmemorativo</option>
+          <option value="suspension">Suspensión de labores</option>
+          <option value="vacaciones">Vacaciones</option>
+          <option value="regreso">Regreso a clases</option>
+          <option value="cte">Consejo Técnico Escolar</option>
+          <option value="receso">Receso de clases</option>
+          <option value="calificaciones">Registro de calificaciones</option>
+          <option value="inicio">Inicio de ciclo</option>
+          <option value="fin">Fin de ciclo</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row single"><div class="form-group">
+      <label>Descripción *</label>
+      <input type="text" id="ev-texto" placeholder="Ej: Día del Maestro 🍎">
+    </div></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="guardarEvento()">💾 Guardar</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-evento')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Cumpleaños -->
 <div class="modal-overlay" id="modal-bday">
   <div class="modal">
@@ -510,12 +552,12 @@ const EVENTOS_CALENDARIO = [
   // ABRIL 2026
   {fecha:'2026-04-02', tipo:'suspension', texto:'Suspensión de labores docentes', color:'#C0181A'},
   {fecha:'2026-04-03', tipo:'suspension', texto:'Suspensión de labores docentes', color:'#C0181A'},
-  {fecha:'2026-04-06', tipo:'vacaciones', texto:'Inicio de Vacaciones de Semana Santa', color:'#1E6BB5'},
-  {fecha:'2026-04-07', tipo:'vacaciones', texto:'Vacaciones de Semana Santa', color:'#1E6BB5'},
-  {fecha:'2026-04-08', tipo:'vacaciones', texto:'Vacaciones de Semana Santa', color:'#1E6BB5'},
+  {fecha:'2026-04-06', tipo:'vacaciones', texto:'¡Inicio de Vacaciones de Semana Santa!', color:'#1E6BB5'},
+  {fecha:'2026-04-07', tipo:'vacaciones', texto:'Vacaciones de Semana Santa — Martes Santo', color:'#1E6BB5'},
+  {fecha:'2026-04-08', tipo:'vacaciones', texto:'Vacaciones de Semana Santa — Miércoles Santo', color:'#1E6BB5'},
   {fecha:'2026-04-09', tipo:'vacaciones', texto:'Vacaciones de Semana Santa — Jueves Santo', color:'#1E6BB5'},
   {fecha:'2026-04-10', tipo:'vacaciones', texto:'Vacaciones de Semana Santa — Viernes Santo', color:'#1E6BB5'},
-  {fecha:'2026-04-13', tipo:'regreso', texto:'Regreso a clases — Fin de Semana Santa', color:'#2E7D32'},
+  {fecha:'2026-04-13', tipo:'regreso', texto:'Regreso a clases — Bienvenidos de vuelta', color:'#2E7D32'},
   // MAYO 2026
   {fecha:'2026-05-01', tipo:'festivo', texto:'Día del Trabajo — Día festivo', color:'#C0181A'},
   {fecha:'2026-05-05', tipo:'conmem', texto:'Batalla de Puebla — Día conmemorativo', color:'#6A1B9A'},
@@ -873,18 +915,69 @@ function renderEventos() {
   const el = document.getElementById('lista-eventos');
   const now = new Date().toISOString().split('T')[0];
   const sorted = [...EVENTOS_CALENDARIO].sort((a,b) => a.fecha.localeCompare(b.fecha));
-  el.innerHTML = sorted.map(e => {
+  el.innerHTML = sorted.map((e, i) => {
     const isPast = e.fecha < now;
     const isToday = e.fecha === now;
-    return `<div class="event-item" style="opacity:${isPast?0.45:1};${isToday?'background:#FFF8E1;border-color:var(--amber)':''}">
+    return `<div class="event-item" style="opacity:${isPast?0.5:1};${isToday?'background:#FFF8E1;border-color:var(--amber)':''}">
       <div class="event-dot" style="background:${e.color}"></div>
-      <div class="event-date">${formatDate(e.fecha)}</div>
-      <div>
+      <div class="event-date" style="min-width:90px">${formatDate(e.fecha)}</div>
+      <div style="flex:1">
         <div class="event-text">${e.texto}${isToday?' ← HOY':''}</div>
         <div class="event-tipo" style="color:${e.color}">${formatTipo(e.tipo)}</div>
       </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="btn btn-sm btn-secondary" onclick="editarEvento(${i})" style="font-size:11px;padding:3px 7px">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="eliminarEvento(${i})" style="font-size:11px;padding:3px 7px">🗑</button>
+      </div>
     </div>`;
   }).join('');
+}
+
+function editarEvento(idx) {
+  const e = EVENTOS_CALENDARIO[idx];
+  if (!e) return;
+  document.getElementById('ev-fecha').value  = e.fecha;
+  document.getElementById('ev-texto').value  = e.texto;
+  document.getElementById('ev-tipo').value   = e.tipo;
+  document.getElementById('ev-fecha').dataset.editIdx = idx;
+  document.querySelector('#modal-evento .modal-title').textContent = '✏️ Editar Evento';
+  openModal('modal-evento');
+}
+
+function eliminarEvento(idx) {
+  if (!confirm('¿Eliminar este evento del calendario?')) return;
+  EVENTOS_CALENDARIO.splice(idx, 1);
+  renderEventos();
+  toast('🗑 Evento eliminado (solo en esta sesión — recarga para restaurar)', '');
+}
+
+function guardarEvento() {
+  const fecha = document.getElementById('ev-fecha').value.trim();
+  const texto = document.getElementById('ev-texto').value.trim();
+  const tipo  = document.getElementById('ev-tipo').value;
+  const editIdx = document.getElementById('ev-fecha').dataset.editIdx;
+  if (!fecha || !texto) { toast('Fecha y texto son obligatorios', 'error'); return; }
+  
+  const colores = {
+    inicio:'#2E7D32', fin:'#8B0E10', vacaciones:'#1E6BB5', regreso:'#2E7D32',
+    festivo:'#C0181A', conmem:'#6A1B9A', suspension:'#C0181A',
+    cte:'#E8650A', receso:'#1E6BB5', calificaciones:'#00695C'
+  };
+  
+  const evento = { fecha, texto, tipo, color: colores[tipo] || '#666', emoji: '📅' };
+  
+  if (editIdx !== undefined && editIdx !== '') {
+    EVENTOS_CALENDARIO[parseInt(editIdx)] = evento;
+    toast('✅ Evento actualizado');
+  } else {
+    EVENTOS_CALENDARIO.push(evento);
+    toast('✅ Evento agregado');
+  }
+  
+  document.getElementById('ev-fecha').dataset.editIdx = '';
+  document.querySelector('#modal-evento .modal-title').textContent = '📅 Nuevo Evento';
+  closeModal('modal-evento');
+  renderEventos();
 }
 
 function renderPrestaciones() {
