@@ -721,7 +721,11 @@ function getPrestacionActual() {
 
 function getEventosHoy() {
   const hoy = new Date().toISOString().split('T')[0];
-  return EVENTOS_CALENDARIO.filter(e => e.fecha === hoy);
+  // Preferir datos del Sheet si están disponibles
+  const fuente = (window._eventosSheet && window._eventosSheet.length > 0)
+    ? window._eventosSheet
+    : EVENTOS_CALENDARIO;
+  return fuente.filter(e => e.fecha === hoy);
 }
 
 function buildSidebarExtras() {
@@ -754,7 +758,7 @@ function buildAutoAvisos() {
   const hoy = new Date().toISOString().split('T')[0];
   const auto = [];
 
-  // Eventos del calendario
+  // Eventos del calendario (Sheet o código)
   const eventos = getEventosHoy();
   eventos.forEach(e => {
     auto.push({
@@ -1030,12 +1034,17 @@ async function loadData() {
       clearTimeout(tid);
       const d = await r.json();
       if(d.error) throw new Error(d.error);
+      // Guardar eventos del Sheet para uso posterior
+      if (d.eventos && d.eventos.length > 0) {
+        window._eventosSheet = d.eventos;
+      }
       const autoAv = buildAutoAvisos();
       const allAvisos = [...autoAv, ...(d.avisos||[])];
       buildAvisos(allAvisos);
       buildBdays(d.cumpleanos || []);
       const tickerItems = (d.ticker && d.ticker.length) ? d.ticker : (d.avisos||[]);
       buildTicker(tickerItems);
+      buildSidebarExtras();
       showStatus('online');
       loadSeason();
       return;

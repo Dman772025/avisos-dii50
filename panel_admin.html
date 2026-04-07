@@ -730,6 +730,7 @@ async function loadData() {
     renderBdaysTable(d.cumpleanos || []);
     updateStats(d);
     updateDashboardLocal();
+    renderEventos();
   } catch(e) {
     setStatus(false);
     console.warn('Error cargando:', e.message);
@@ -914,7 +915,11 @@ function renderBdaysTable(bdays) {
 function renderEventos() {
   const el = document.getElementById('lista-eventos');
   const now = new Date().toISOString().split('T')[0];
-  const sorted = [...EVENTOS_CALENDARIO].sort((a,b) => a.fecha.localeCompare(b.fecha));
+  // Usar datos del Sheet si están disponibles, si no usar los del código
+  const fuente = (remoteData && remoteData.eventos && remoteData.eventos.length > 0)
+    ? remoteData.eventos
+    : EVENTOS_CALENDARIO;
+  const sorted = [...fuente].sort((a,b) => a.fecha.localeCompare(b.fecha));
   el.innerHTML = sorted.map((e, i) => {
     const isPast = e.fecha < now;
     const isToday = e.fecha === now;
@@ -944,40 +949,58 @@ function editarEvento(idx) {
   openModal('modal-evento');
 }
 
-function eliminarEvento(idx) {
+async function eliminarEvento(idx) {
   if (!confirm('¿Eliminar este evento del calendario?')) return;
-  EVENTOS_CALENDARIO.splice(idx, 1);
-  renderEventos();
-  toast('🗑 Evento eliminado (solo en esta sesión — recarga para restaurar)', '');
+  try {
+    const r = await callScript('deleteEvento', {index: idx});
+    if (r && r.ok !== false) {
+      toast('🗑 Evento eliminado');
+      setTimeout(loadData, 4000);
+    } else {
+      toast('Error al eliminar', 'error');
+    }
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
-function guardarEvento() {
-  const fecha = document.getElementById('ev-fecha').value.trim();
-  const texto = document.getElementById('ev-texto').value.trim();
-  const tipo  = document.getElementById('ev-tipo').value;
+async function guardarEvento() {
+  const fecha   = document.getElementById('ev-fecha').value.trim();
+  const texto   = document.getElementById('ev-texto').value.trim();
+  const tipo    = document.getElementById('ev-tipo').value;
   const editIdx = document.getElementById('ev-fecha').dataset.editIdx;
   if (!fecha || !texto) { toast('Fecha y texto son obligatorios', 'error'); return; }
-  
+
   const colores = {
     inicio:'#2E7D32', fin:'#8B0E10', vacaciones:'#1E6BB5', regreso:'#2E7D32',
     festivo:'#C0181A', conmem:'#6A1B9A', suspension:'#C0181A',
     cte:'#E8650A', receso:'#1E6BB5', calificaciones:'#00695C'
   };
-  
-  const evento = { fecha, texto, tipo, color: colores[tipo] || '#666', emoji: '📅' };
-  
-  if (editIdx !== undefined && editIdx !== '') {
-    EVENTOS_CALENDARIO[parseInt(editIdx)] = evento;
-    toast('✅ Evento actualizado');
-  } else {
-    EVENTOS_CALENDARIO.push(evento);
-    toast('✅ Evento agregado');
+  const emojis = {
+    inicio:'🏫', fin:'🎓', vacaciones:'🏖️', regreso:'📚', festivo:'🚫',
+    conmem:'📅', suspension:'📋', cte:'👩‍🏫', receso:'⏸️', calificaciones:'📊'
+  };
+
+  const payload = {
+    fecha, texto, tipo,
+    color: colores[tipo] || '#666',
+    emoji: emojis[tipo] || '📅'
+  };
+
+  try {
+    if (editIdx !== undefined && editIdx !== '') {
+      payload.index = editIdx;
+      await callScript('editEvento', payload);
+      toast('✅ Evento actualizado en Sheets');
+    } else {
+      await callScript('saveEvento', payload);
+      toast('✅ Evento agregado a Sheets');
+    }
+    document.getElementById('ev-fecha').dataset.editIdx = '';
+    document.querySelector('#modal-evento .modal-title').textContent = '📅 Nuevo Evento';
+    closeModal('modal-evento');
+    setTimeout(loadData, 4000);
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
   }
-  
-  document.getElementById('ev-fecha').dataset.editIdx = '';
-  document.querySelector('#modal-evento .modal-title').textContent = '📅 Nuevo Evento';
-  closeModal('modal-evento');
-  renderEventos();
 }
 
 function renderPrestaciones() {
